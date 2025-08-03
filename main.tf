@@ -1,13 +1,28 @@
+# backend-setup/main.tf
+
 provider "aws" {
   region = "ap-south-1"
 }
 
-resource "aws_instance" "my_ec2" {
-  ami             = "ami-0d0ad8bb301edb745" # Amazon Linux 2 AMI
-  instance_type   = "t2.micro"
-  key_name        = "nukanth"
-  security_groups = ["default"]
-  tags = {
-    Name = "og"
+resource "aws_s3_bucket" "terraform_state" {
+  bucket = "sainu-terraform-state-bucket"
+
+  versioning {
+    enabled = true
+  }
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "aws_dynamodb_table" "terraform_locks" {
+  name         = "terraform-lock"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "LockID"
+
+  attribute {
+    name = "LockID"
+    type = "S"
   }
 }
